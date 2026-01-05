@@ -1,0 +1,303 @@
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="12dp"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header with ID and Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/idd"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="#0001"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimary"
+                tools:text="#0001" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Print Button -->
+                <ImageView
+                    android:id="@+id/print"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="6dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Print"
+                    app:srcCompat="@drawable/ic_menu_print"
+                    app:tint="@color/colorPrimary" />
+
+                <!-- Edit Button -->
+                <ImageView
+                    android:id="@+id/edit"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="6dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Edit"
+                    app:srcCompat="@drawable/icon_edit_round"
+                    app:tint="@color/colorPrimary" />
+
+                <!-- Delete Button -->
+                <ImageView
+                    android:id="@+id/delete"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:padding="6dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Delete"
+                    app:srcCompat="@drawable/icon_delete_round"
+                    app:tint="@android:color/holo_red_dark" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="12dp"
+            android:background="@android:color/darker_gray" />
+
+        <!-- Data Rows -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="4dp">
+
+            <!-- Row 1: Driver Name -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/textview1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Driver Name:"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    tools:text="Driver Name:" />
+
+                <TextView
+                    android:id="@+id/dName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:text="John Doe"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    tools:text="John Doe" />
+
+            </LinearLayout>
+
+            <!-- Row 2: Accident Type -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/textview3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Accident Type:"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    tools:text="Accident Type:" />
+
+                <TextView
+                    android:id="@+id/aType"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:text="Minor"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    tools:text="Minor" />
+
+            </LinearLayout>
+
+            <!-- Row 3: Plate Number -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/textview5"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Plate Number:"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    tools:text="Plate Number:" />
+
+                <TextView
+                    android:id="@+id/pNumber"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:text="S12345"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    tools:text="S12345" />
+
+            </LinearLayout>
+
+            <!-- Row 4: Vehicle Model -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/textview7"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Vehicle Model:"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    tools:text="Vehicle Model:" />
+
+                <TextView
+                    android:id="@+id/vModel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:text="Toyota Camry"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    tools:text="Toyota Camry" />
+
+            </LinearLayout>
+
+            <!-- Row 5: City -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/textview9"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="City:"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    tools:text="City:" />
+
+                <TextView
+                    android:id="@+id/cityAcc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:text="New York"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    tools:text="New York" />
+
+            </LinearLayout>
+
+            <!-- Row 6: Country -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/textview11"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Country:"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    tools:text="Country:" />
+
+                <TextView
+                    android:id="@+id/country"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:text="USA"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    tools:text="USA" />
+
+            </LinearLayout>
+
+            <!-- Row 7: Date -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="0dp">
+
+                <TextView
+                    android:id="@+id/textview13"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Date:"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    tools:text="Date:" />
+
+                <TextView
+                    android:id="@+id/date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.5"
+                    android:text="12/12/2012"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black"
+                    tools:text="12/12/2012" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

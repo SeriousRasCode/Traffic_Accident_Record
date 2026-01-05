@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#1565C0</color> <!-- Darker Blue -->
+    <color name="colorPrimaryDark">#0D47A1</color> <!-- Even Darker Blue -->
+    <color name="colorAccent">#FFC107</color> <!-- Amber -->
+    <color name="bgColor">#F5F5F5</color> <!-- Light Grey Background -->
+    <color name="textColor">#212121</color> <!-- Almost Black -->
+</resources>
