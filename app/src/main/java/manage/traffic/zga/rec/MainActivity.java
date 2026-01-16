@@ -23,16 +23,16 @@ public class MainActivity extends AppCompatActivity {
         if (isLoggedIn) {
             boolean isAdmin = sharedPreferences.getBoolean("isAdmin", false);
             if (isAdmin) {
-                Intent intent = new Intent(getApplicationContext(), AdminDashboardActivity.class);
+                Intent intent = new Intent(getApplicationContext(), manage.traffic.zga.rec.activities.dashboard.AdminDashboardActivity.class);
                 startActivity(intent);
             } else {
-                Intent intent = new Intent(getApplicationContext(), ManagementActivity.class);
+                Intent intent = new Intent(getApplicationContext(), manage.traffic.zga.rec.activities.dashboard.ManagementActivity.class);
                 startActivity(intent);
             }
         } else {
-            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            Intent intent = new Intent(getApplicationContext(), manage.traffic.zga.rec.activities.auth.LoginActivity.class);
             startActivity(intent);
         }
         finish();
     }
-}
+}

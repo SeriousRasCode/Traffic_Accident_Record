@@ -1,4 +1,4 @@
-package manage.traffic.zga.rec;
+package manage.traffic.zga.rec.activities.data;
 
 import android.app.DatePickerDialog;
 import android.database.Cursor;
@@ -17,6 +17,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+
+import manage.traffic.zga.rec.DBHelper;
+import manage.traffic.zga.rec.R;
 
 public class EditDataActivity extends AppCompatActivity {
 
@@ -125,3 +128,4 @@ public class EditDataActivity extends AppCompatActivity {
         }
     }
 }
+

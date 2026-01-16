@@ -1,4 +1,4 @@
-package manage.traffic.zga.rec;
+package manage.traffic.zga.rec.activities.dashboard;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -18,7 +18,6 @@ import android.print.PrintDocumentInfo;
 import android.print.PrintManager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,6 +32,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import manage.traffic.zga.rec.AccidentAdapter;
+import manage.traffic.zga.rec.DBHelper;
+import manage.traffic.zga.rec.R;
+import manage.traffic.zga.rec.activities.auth.LoginActivity;
 
 public class AdminDashboardActivity extends AppCompatActivity {
 
@@ -113,13 +117,16 @@ public class AdminDashboardActivity extends AppCompatActivity {
         boolean[] checkedItems = new boolean[users.size()];
 
         for (int i = 0; i < users.size(); i++) {
-            userNames[i] = (String) users.get(i).get(DBHelper.USER_COLUMN_USERNAME);
-            int isAdmin = (int) users.get(i).get(DBHelper.USER_COLUMN_IS_ADMIN);
+            Object usernameObj = users.get(i).get(DBHelper.USER_COLUMN_USERNAME);
+            String username = usernameObj != null ? usernameObj.toString() : "";
+            userNames[i] = username;
+            Object isAdminObj = users.get(i).get(DBHelper.USER_COLUMN_IS_ADMIN);
+            int isAdmin = isAdminObj != null ? ((Number) isAdminObj).intValue() : 0;
             checkedItems[i] = (isAdmin == 1);
         }
 
         builder.setMultiChoiceItems(userNames, checkedItems, (dialog, which, isChecked) -> {
-             int userId = (int) users.get(which).get(DBHelper.USER_COLUMN_ID);
+             int userId = ((Number) users.get(which).get(DBHelper.USER_COLUMN_ID)).intValue();
              // Prevent removing admin rights from the "admin" user to avoid lockout
              if (userNames[which].equals("admin") && !isChecked) {
                  Toast.makeText(AdminDashboardActivity.this, "Cannot remove admin rights from superuser.", Toast.LENGTH_SHORT).show();
@@ -177,24 +184,42 @@ public class AdminDashboardActivity extends AppCompatActivity {
             Canvas canvas = page.getCanvas();
             Paint paint = new Paint();
             paint.setColor(Color.BLACK);
-            paint.setTextSize(12);
+            paint.setTextSize(10); // Adjusted for more content
 
             int x = 10, y = 25;
 
+            paint.setTextSize(16);
+            paint.setFakeBoldText(true);
             canvas.drawText("Traffic Accident Records", x, y, paint);
-            y += 20;
+            y += 30;
+            paint.setTextSize(10);
+            paint.setFakeBoldText(false);
 
             for (HashMap<String, Object> map : list) {
-                String record = "ID: " + map.get("id") + ", Location: " + map.get("location") + ", Date: " + map.get("date");
-                canvas.drawText(record, x, y, paint);
-                y += 20;
-                if (y > 800) { // Simple page break check
+                if (y > 780) { // Check for page break before drawing record
                     pdfDocument.finishPage(page);
                     pageInfo = new PdfDocument.PageInfo.Builder(595, 842, pdfDocument.getPages().size() + 1).create();
                     page = pdfDocument.startPage(pageInfo);
                     canvas = page.getCanvas();
                     y = 25;
                 }
+
+                canvas.drawText("ID: " + map.get(DBHelper.COLUMN_ID), x, y, paint);
+                y += 15;
+                canvas.drawText("Driver: " + map.get(DBHelper.COLUMN_DRIVER), x, y, paint);
+                y += 15;
+                canvas.drawText("Accident Type: " + map.get(DBHelper.COLUMN_ACCIDENT_TYPE), x, y, paint);
+                y += 15;
+                canvas.drawText("Vehicle Plate: " + map.get(DBHelper.COLUMN_VEHICLE_PLATE), x, y, paint);
+                y += 15;
+                canvas.drawText("Vehicle Model: " + map.get(DBHelper.COLUMN_VEHICLE_MODEL), x, y, paint);
+                y += 15;
+                canvas.drawText("City: " + map.get(DBHelper.COLUMN_CITY), x, y, paint);
+                y += 15;
+                canvas.drawText("Country: " + map.get(DBHelper.COLUMN_COUNTRY), x, y, paint);
+                y += 15;
+                canvas.drawText("Date: " + map.get(DBHelper.COLUMN_DATE), x, y, paint);
+                y += 25; // Extra space between records
             }
 
             pdfDocument.finishPage(page);

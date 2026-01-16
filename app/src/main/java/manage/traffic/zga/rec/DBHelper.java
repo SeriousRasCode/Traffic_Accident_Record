@@ -26,14 +26,23 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_COUNTRY = "country";
     public static final String COLUMN_DATE = "date";
 
+    // Aliases for backward compatibility and clearer naming
+    public static final String COLUMN_ACCIDENT_TYPE = COLUMN_TYPE;
+    public static final String COLUMN_VEHICLE_PLATE = COLUMN_PLATE;
+    public static final String COLUMN_VEHICLE_MODEL = COLUMN_MODEL;
+
     // Users Column Names
     public static final String USER_COLUMN_ID = "id";
-    public static final String USER_COLUMN_USERNAME = "username";
+    public static final String USER_COLUMN_NAME = "name";
+    public static final String USER_COLUMN_EMAIL = "email";
+    public static final String USER_COLUMN_USERNAME = "username"; // Keep for backward compatibility
     public static final String USER_COLUMN_PASSWORD = "password";
     public static final String USER_COLUMN_IS_ADMIN = "isAdmin";
+    public static final String USER_COLUMN_SECURITY_QUESTION = "security_question";
+    public static final String USER_COLUMN_SECURITY_ANSWER = "security_answer";
 
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME, null, 2);
+        super(context, DATABASE_NAME, null, 3);
     }
 
     @Override
@@ -45,21 +54,43 @@ public class DBHelper extends SQLiteOpenHelper {
         );
         db.execSQL(
                 "create table " + USERS_TABLE_NAME + " " +
-                        "(id integer primary key autoincrement, username text, password text, isAdmin integer)"
+                        "(id integer primary key autoincrement, name text, email text unique, username text, password text, isAdmin integer, security_question text, security_answer text)"
         );
         // Seed Super Admin
         ContentValues contentValues = new ContentValues();
-        contentValues.put(USER_COLUMN_USERNAME, "admin");
-        contentValues.put(USER_COLUMN_PASSWORD, "admin");
+        contentValues.put(USER_COLUMN_NAME, "Administrator");
+        contentValues.put(USER_COLUMN_EMAIL, "admin@admin.com");
+        contentValues.put(USER_COLUMN_USERNAME, "admin1");
+        contentValues.put(USER_COLUMN_PASSWORD, "admin1");
         contentValues.put(USER_COLUMN_IS_ADMIN, 1);
+        contentValues.put(USER_COLUMN_SECURITY_QUESTION, "What is your favorite food?");
+        contentValues.put(USER_COLUMN_SECURITY_ANSWER, "admin1");
         db.insert(USERS_TABLE_NAME, null, contentValues);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + ACCIDENTS_TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE_NAME);
-        onCreate(db);
+        if (oldVersion < 3) {
+            // Migrate to version 3 with new user fields
+            try {
+                db.execSQL("ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN name text");
+                db.execSQL("ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN email text");
+                db.execSQL("ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN security_question text");
+                db.execSQL("ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN security_answer text");
+                // Update existing admin user
+                ContentValues adminValues = new ContentValues();
+                adminValues.put(USER_COLUMN_NAME, "Administrator");
+                adminValues.put(USER_COLUMN_EMAIL, "admin@admin.com");
+                adminValues.put(USER_COLUMN_SECURITY_QUESTION, "What is your favorite food?");
+                adminValues.put(USER_COLUMN_SECURITY_ANSWER, "admin1");
+                db.update(USERS_TABLE_NAME, adminValues, USER_COLUMN_USERNAME + " = ?", new String[]{"admin1"});
+            } catch (Exception e) {
+                // If migration fails, recreate tables
+                db.execSQL("DROP TABLE IF EXISTS " + ACCIDENTS_TABLE_NAME);
+                db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE_NAME);
+                onCreate(db);
+            }
+        }
     }
 
     // REGISTER / INSERT DATA
@@ -134,19 +165,35 @@ public class DBHelper extends SQLiteOpenHelper {
         return (int) DatabaseUtils.queryNumEntries(db, ACCIDENTS_TABLE_NAME);
     }
 
+    // Legacy method for backward compatibility
     public boolean insertUser(String username, String password, boolean isAdmin) {
+        return insertUser("", username, password, isAdmin, "", "");
+    }
+
+    // New method with all fields
+    public boolean insertUser(String name, String email, String password, boolean isAdmin, String securityQuestion, String securityAnswer) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(USER_COLUMN_USERNAME, username);
+        contentValues.put(USER_COLUMN_NAME, name);
+        contentValues.put(USER_COLUMN_EMAIL, email);
+        contentValues.put(USER_COLUMN_USERNAME, email); // Use email as username for compatibility
         contentValues.put(USER_COLUMN_PASSWORD, password);
         contentValues.put(USER_COLUMN_IS_ADMIN, isAdmin ? 1 : 0);
+        contentValues.put(USER_COLUMN_SECURITY_QUESTION, securityQuestion);
+        contentValues.put(USER_COLUMN_SECURITY_ANSWER, securityAnswer);
         long result = db.insert(USERS_TABLE_NAME, null, contentValues);
         return result != -1;
     }
 
+    // Legacy method for backward compatibility
     public int checkUserRole(String username, String password) {
+        return checkUserRoleByEmail(username, password);
+    }
+
+    // New method using email
+    public int checkUserRoleByEmail(String email, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + USERS_TABLE_NAME + " WHERE " + USER_COLUMN_USERNAME + " = ? AND " + USER_COLUMN_PASSWORD + " = ?", new String[]{username, password});
+        Cursor cursor = db.rawQuery("SELECT * FROM " + USERS_TABLE_NAME + " WHERE " + USER_COLUMN_EMAIL + " = ? AND " + USER_COLUMN_PASSWORD + " = ?", new String[]{email, password});
         int role = -1; // -1 means login failed
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
@@ -182,11 +229,51 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
+    // Legacy method for backward compatibility
     public boolean checkUserExists(String username) {
+        return checkEmailExists(username);
+    }
+
+    // Check if email exists
+    public boolean checkEmailExists(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + USERS_TABLE_NAME + " WHERE " + USER_COLUMN_USERNAME + " = ?", new String[]{username});
+        Cursor cursor = db.rawQuery("SELECT * FROM " + USERS_TABLE_NAME + " WHERE " + USER_COLUMN_EMAIL + " = ?", new String[]{email});
         boolean exists = (cursor.getCount() > 0);
         cursor.close();
         return exists;
+    }
+
+    // Get security question for an email
+    public String getSecurityQuestion(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT " + USER_COLUMN_SECURITY_QUESTION + " FROM " + USERS_TABLE_NAME + " WHERE " + USER_COLUMN_EMAIL + " = ?", new String[]{email});
+        String question = null;
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            int columnIndex = cursor.getColumnIndex(USER_COLUMN_SECURITY_QUESTION);
+            if (columnIndex >= 0) {
+                question = cursor.getString(columnIndex);
+            }
+        }
+        cursor.close();
+        return question;
+    }
+
+    // Verify security answer and reset password
+    public boolean verifySecurityAnswerAndResetPassword(String email, String answer, String newPassword) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + USERS_TABLE_NAME + " WHERE " + USER_COLUMN_EMAIL + " = ? AND " + USER_COLUMN_SECURITY_ANSWER + " = ?", 
+                new String[]{email, answer.toLowerCase().trim()});
+        
+        if (cursor.getCount() > 0) {
+            cursor.close();
+            // Update password
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(USER_COLUMN_PASSWORD, newPassword);
+            int rowsAffected = db.update(USERS_TABLE_NAME, contentValues, USER_COLUMN_EMAIL + " = ?", new String[]{email});
+            return rowsAffected > 0;
+        }
+        cursor.close();
+        return false;
     }
 }

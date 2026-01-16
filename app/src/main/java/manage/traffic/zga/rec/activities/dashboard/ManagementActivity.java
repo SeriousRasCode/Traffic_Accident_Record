@@ -1,4 +1,4 @@
-package manage.traffic.zga.rec;
+package manage.traffic.zga.rec.activities.dashboard;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,6 +21,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import manage.traffic.zga.rec.AccidentAdapter;
+import manage.traffic.zga.rec.DBHelper;
+import manage.traffic.zga.rec.R;
+import manage.traffic.zga.rec.activities.auth.LoginActivity;
+import manage.traffic.zga.rec.activities.data.AddDataActivity;
 
 public class ManagementActivity extends AppCompatActivity {
 
@@ -91,9 +97,41 @@ public class ManagementActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
-
         getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        // Initialize and configure the SearchView
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        if (searchItem != null) {
+            searchView = (SearchView) searchItem.getActionView();
+
+            if (searchView != null) {
+                searchView.setQueryHint("Search records...");
+
+                // FIX #3: Force SearchView text & hint to BLACK
+                try {
+                    EditText searchText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+                    if (searchText != null) {
+                        searchText.setTextColor(Color.BLACK);
+                        searchText.setHintTextColor(Color.GRAY);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        filter(newText);
+                        return true;
+                    }
+                });
+            }
+        }
 
         // FIX #2: Force menu icon color to BLACK
         for (int i = 0; i < menu.size(); i++) {
@@ -101,36 +139,6 @@ public class ManagementActivity extends AppCompatActivity {
             if (item.getIcon() != null) {
                 DrawableCompat.setTint(item.getIcon(), Color.BLACK);
             }
-        }
-
-
-
-        if (searchView != null) {
-            searchView.setQueryHint("Search records...");
-
-            // FIX #3: Force SearchView text & hint to BLACK
-            try {
-                EditText searchText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
-                if (searchText != null) {
-                    searchText.setTextColor(Color.BLACK);
-                    searchText.setHintTextColor(Color.GRAY);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    filter(newText);
-                    return true;
-                }
-            });
         }
 
         return true;

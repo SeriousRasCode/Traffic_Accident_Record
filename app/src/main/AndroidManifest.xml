@@ -23,32 +23,37 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".ManagementActivity"
+			android:name=".activities.dashboard.ManagementActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
 			android:hardwareAccelerated="true"
 			android:supportsPictureInPicture="true" />
 		<activity
-			android:name=".EditDataActivity"
+			android:name=".activities.data.EditDataActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
 			android:hardwareAccelerated="true"
 			android:supportsPictureInPicture="true" />
 		<activity
-			android:name=".AddDataActivity"
+			android:name=".activities.data.AddDataActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
 			android:hardwareAccelerated="true"
 			android:supportsPictureInPicture="true" />
 		<activity
-			android:name=".LoginActivity"
+			android:name=".activities.auth.LoginActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
 			android:hardwareAccelerated="true"
 			android:supportsPictureInPicture="true" />
 		<activity
-			android:name=".SignupActivity"
+			android:name=".activities.auth.SignupActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
 			android:hardwareAccelerated="true"
 			android:supportsPictureInPicture="true" />
 		<activity
-			android:name=".AdminDashboardActivity"
+			android:name=".activities.auth.ForgotPasswordActivity"
+			android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+			android:hardwareAccelerated="true"
+			android:supportsPictureInPicture="true" />
+		<activity
+			android:name=".activities.dashboard.AdminDashboardActivity"
 			android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
 			android:hardwareAccelerated="true"
 			android:supportsPictureInPicture="true" />

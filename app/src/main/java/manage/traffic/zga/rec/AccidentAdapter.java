@@ -59,7 +59,7 @@ public class AccidentAdapter extends RecyclerView.Adapter<AccidentAdapter.ViewHo
         holder.date.setText(String.valueOf(item.get(DBHelper.COLUMN_DATE)));
 
         holder.edit.setOnClickListener(v -> {
-            Intent intent = new Intent(context, EditDataActivity.class);
+            Intent intent = new Intent(context, manage.traffic.zga.rec.activities.data.EditDataActivity.class);
             intent.putExtra("id", String.valueOf(item.get(DBHelper.COLUMN_ID)));
             context.startActivity(intent);
         });

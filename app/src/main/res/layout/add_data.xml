@@ -172,7 +172,9 @@
                 android:layout_marginBottom="8dp"
                 android:text="Accident Date"
                 android:textSize="14sp"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textAppearance="?attr/textAppearanceCaption" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -195,7 +197,8 @@
                         android:layout_height="wrap_content"
                         android:text="12/12/2012"
                         android:textSize="16sp"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:textColor="?attr/colorOnSurface"
+                        android:textAppearance="?attr/textAppearanceBody1" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -207,8 +210,7 @@
                 android:layout_height="56dp"
                 android:text="Save"
                 app:cornerRadius="12dp"
-                android:textSize="16sp"
-                style="@style/Widget.MaterialComponents.Button" />
+                android:textSize="16sp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
