@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -37,6 +38,7 @@ public class ManagementActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
     private SharedPreferences sharedPreferences;
     private SearchView searchView;
+    private int userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +54,6 @@ public class ManagementActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitleTextColor(Color.WHITE);
 
-
-        // IMPORTANT FIX #1: Force light popup menu using full package name for library resources
         toolbar.setPopupTheme(androidx.appcompat.R.style.ThemeOverlay_AppCompat_Light);
 
         setSupportActionBar(toolbar);
@@ -61,21 +61,26 @@ public class ManagementActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Record Management");
         }
 
-        // Toolbar title color
         toolbar.setTitleTextColor(Color.WHITE);
 
-
         sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE);
+        userId = sharedPreferences.getInt("userId", -1);
 
         _fab.setOnClickListener(view -> {
             Intent intent = new Intent(ManagementActivity.this, AddDataActivity.class);
+            intent.putExtra("userId", userId);
             startActivity(intent);
         });
     }
 
     private void initializeLogic() {
         DBHelper dbHelper = new DBHelper(this);
-        accidentList = dbHelper.getAllAccidents();
+        if (userId != -1) {
+            accidentList = dbHelper.getAccidentsForUser(userId);
+        } else {
+            accidentList = new ArrayList<>();
+            Toast.makeText(this, "Error: User not logged in.", Toast.LENGTH_LONG).show();
+        }
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new AccidentAdapter(this, accidentList);
@@ -99,7 +104,6 @@ public class ManagementActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
 
-        // Initialize and configure the SearchView
         MenuItem searchItem = menu.findItem(R.id.action_search);
         if (searchItem != null) {
             searchView = (SearchView) searchItem.getActionView();
@@ -107,7 +111,6 @@ public class ManagementActivity extends AppCompatActivity {
             if (searchView != null) {
                 searchView.setQueryHint("Search records...");
 
-                // FIX #3: Force SearchView text & hint to BLACK
                 try {
                     EditText searchText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
                     if (searchText != null) {
@@ -133,7 +136,6 @@ public class ManagementActivity extends AppCompatActivity {
             }
         }
 
-        // FIX #2: Force menu icon color to BLACK
         for (int i = 0; i < menu.size(); i++) {
             MenuItem item = menu.getItem(i);
             if (item.getIcon() != null) {
@@ -151,7 +153,7 @@ public class ManagementActivity extends AppCompatActivity {
         if (id == R.id.action_about) {
             new AlertDialog.Builder(this)
                     .setTitle("About")
-                    .setMessage("Traffic Accident Record App\nVersion 1.0\nDeveloped by ZGA")
+                    .setMessage("Traffic Accident Record App\nVersion 1.0\nDeveloped by: Group 4c\n\nSubmitted To: Mr. Aschalew")
                     .setPositiveButton("OK", null)
                     .show();
             return true;

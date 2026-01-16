@@ -18,6 +18,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     // Accidents Column Names
     public static final String COLUMN_ID = "id";
+    public static final String COLUMN_USER_ID = "user_id"; // Foreign key to users table
     public static final String COLUMN_DRIVER = "driver_name";
     public static final String COLUMN_TYPE = "accident_type";
     public static final String COLUMN_PLATE = "vplate";
@@ -42,15 +43,15 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String USER_COLUMN_SECURITY_ANSWER = "security_answer";
 
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME, null, 3);
+        super(context, DATABASE_NAME, null, 4); // Incremented database version
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(
                 "create table " + ACCIDENTS_TABLE_NAME + " " +
-                        "(id integer primary key autoincrement, driver_name text, accident_type text, " +
-                        "vplate text, model text, city text, country text, date text)"
+                        "(id integer primary key autoincrement, user_id integer, driver_name text, accident_type text, " +
+                        "vplate text, model text, city text, country text, date text, FOREIGN KEY(user_id) REFERENCES users(id))"
         );
         db.execSQL(
                 "create table " + USERS_TABLE_NAME + " " +
@@ -70,22 +71,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 3) {
-            // Migrate to version 3 with new user fields
+        if (oldVersion < 4) {
             try {
-                db.execSQL("ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN name text");
-                db.execSQL("ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN email text");
-                db.execSQL("ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN security_question text");
-                db.execSQL("ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN security_answer text");
-                // Update existing admin user
-                ContentValues adminValues = new ContentValues();
-                adminValues.put(USER_COLUMN_NAME, "Administrator");
-                adminValues.put(USER_COLUMN_EMAIL, "admin@admin.com");
-                adminValues.put(USER_COLUMN_SECURITY_QUESTION, "What is your favorite food?");
-                adminValues.put(USER_COLUMN_SECURITY_ANSWER, "admin1");
-                db.update(USERS_TABLE_NAME, adminValues, USER_COLUMN_USERNAME + " = ?", new String[]{"admin1"});
+                db.execSQL("ALTER TABLE " + ACCIDENTS_TABLE_NAME + " ADD COLUMN user_id INTEGER");
             } catch (Exception e) {
-                // If migration fails, recreate tables
                 db.execSQL("DROP TABLE IF EXISTS " + ACCIDENTS_TABLE_NAME);
                 db.execSQL("DROP TABLE IF EXISTS " + USERS_TABLE_NAME);
                 onCreate(db);
@@ -93,10 +82,11 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    // REGISTER / INSERT DATA
-    public boolean insertAccident(String driver, String type, String plate, String model, String city, String country, String date) {
+    // INSERT DATA with user ID
+    public boolean insertAccident(int userId, String driver, String type, String plate, String model, String city, String country, String date) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_USER_ID, userId);
         contentValues.put(COLUMN_DRIVER, driver);
         contentValues.put(COLUMN_TYPE, type);
         contentValues.put(COLUMN_PLATE, plate);
@@ -107,6 +97,31 @@ public class DBHelper extends SQLiteOpenHelper {
         db.insert(ACCIDENTS_TABLE_NAME, null, contentValues);
         return true;
     }
+
+    public ArrayList<HashMap<String, Object>> getAccidentsForUser(int userId) {
+        ArrayList<HashMap<String, Object>> listmap = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res = db.rawQuery("SELECT * FROM " + ACCIDENTS_TABLE_NAME + " WHERE " + COLUMN_USER_ID + " = ?", new String[]{String.valueOf(userId)});
+
+        if (res.moveToFirst()) {
+            do {
+                HashMap<String, Object> map = new HashMap<>();
+                map.put(COLUMN_ID, res.getInt(res.getColumnIndex(COLUMN_ID)));
+                map.put(COLUMN_DRIVER, res.getString(res.getColumnIndex(COLUMN_DRIVER)));
+                map.put(COLUMN_TYPE, res.getString(res.getColumnIndex(COLUMN_TYPE)));
+                map.put(COLUMN_PLATE, res.getString(res.getColumnIndex(COLUMN_PLATE)));
+                map.put(COLUMN_MODEL, res.getString(res.getColumnIndex(COLUMN_MODEL)));
+                map.put(COLUMN_CITY, res.getString(res.getColumnIndex(COLUMN_CITY)));
+                map.put(COLUMN_COUNTRY, res.getString(res.getColumnIndex(COLUMN_COUNTRY)));
+                map.put(COLUMN_DATE, res.getString(res.getColumnIndex(COLUMN_DATE)));
+
+                listmap.add(map);
+            } while (res.moveToNext());
+        }
+        res.close();
+        return listmap;
+    }
+
 
     // VIEW DATA BY ID
     public Cursor getData(int id) {
@@ -185,10 +200,17 @@ public class DBHelper extends SQLiteOpenHelper {
         return result != -1;
     }
 
-    // Legacy method for backward compatibility
-    public int checkUserRole(String username, String password) {
-        return checkUserRoleByEmail(username, password);
+    public int checkUser(String email, String password) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + USERS_TABLE_NAME + " WHERE " + USER_COLUMN_EMAIL + " = ? AND " + USER_COLUMN_PASSWORD + " = ?", new String[]{email, password});
+        int userId = -1;
+        if (cursor.moveToFirst()) {
+            userId = cursor.getInt(cursor.getColumnIndex(USER_COLUMN_ID));
+        }
+        cursor.close();
+        return userId;
     }
+
 
     // New method using email
     public int checkUserRoleByEmail(String email, String password) {
@@ -262,9 +284,9 @@ public class DBHelper extends SQLiteOpenHelper {
     // Verify security answer and reset password
     public boolean verifySecurityAnswerAndResetPassword(String email, String answer, String newPassword) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + USERS_TABLE_NAME + " WHERE " + USER_COLUMN_EMAIL + " = ? AND " + USER_COLUMN_SECURITY_ANSWER + " = ?", 
+        Cursor cursor = db.rawQuery("SELECT * FROM " + USERS_TABLE_NAME + " WHERE " + USER_COLUMN_EMAIL + " = ? AND " + USER_COLUMN_SECURITY_ANSWER + " = ?",
                 new String[]{email, answer.toLowerCase().trim()});
-        
+
         if (cursor.getCount() > 0) {
             cursor.close();
             // Update password

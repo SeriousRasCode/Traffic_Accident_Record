@@ -13,7 +13,6 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import manage.traffic.zga.rec.DBHelper;
 import manage.traffic.zga.rec.R;
-import manage.traffic.zga.rec.ValidationHelper;
 import manage.traffic.zga.rec.activities.dashboard.AdminDashboardActivity;
 import manage.traffic.zga.rec.activities.dashboard.ManagementActivity;
 
@@ -43,43 +42,29 @@ public class LoginActivity extends AppCompatActivity {
             String email = emailEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
 
-            // Validate email
-            String emailError = ValidationHelper.getEmailError(email);
-            if (emailError != null) {
-                emailEditText.setError(emailError);
-                Toast.makeText(this, emailError, Toast.LENGTH_SHORT).show();
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please enter both email and password", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Validate password
-            String passwordError = ValidationHelper.getPasswordError(password);
-            if (passwordError != null) {
-                passwordEditText.setError(passwordError);
-                Toast.makeText(this, passwordError, Toast.LENGTH_SHORT).show();
-                return;
-            }
+            int userId = dbHelper.checkUser(email, password);
 
-            int role = dbHelper.checkUserRoleByEmail(email, password);
-
-            if (role == -1) {
-                Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
-
-                boolean isAdmin = (role == 1);
+            if (userId != -1) {
+                int role = dbHelper.checkUserRoleByEmail(email, password);
 
                 SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt("userId", userId);
                 editor.putBoolean("isLoggedIn", true);
-                editor.putString("email", email);
-                editor.putBoolean("isAdmin", isAdmin);
                 editor.apply();
 
-                Intent intent = isAdmin ?
-                        new Intent(this, AdminDashboardActivity.class) :
-                        new Intent(this, ManagementActivity.class);
-
-                startActivity(intent);
+                if (role == 1) { // Admin
+                    startActivity(new Intent(this, AdminDashboardActivity.class));
+                } else { // Regular User
+                    startActivity(new Intent(this, ManagementActivity.class));
+                }
                 finish();
+            } else {
+                Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -92,4 +77,3 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 }
-
