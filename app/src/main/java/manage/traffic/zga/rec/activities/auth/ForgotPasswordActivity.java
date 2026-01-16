@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import manage.traffic.zga.rec.DBHelper;
 import manage.traffic.zga.rec.R;
@@ -18,11 +19,11 @@ import manage.traffic.zga.rec.ValidationHelper;
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     private TextInputEditText emailEditText, securityAnswerEditText, newPasswordEditText, confirmPasswordEditText;
+    private TextInputLayout securityAnswerLayout, newPasswordLayout, confirmPasswordLayout;
     private TextView securityQuestionText;
     private MaterialButton verifyButton, resetPasswordButton;
     private DBHelper dbHelper;
     private String userEmail;
-    private boolean isVerified = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +40,17 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         verifyButton = findViewById(R.id.verifyButton);
         resetPasswordButton = findViewById(R.id.resetPasswordButton);
 
+        // Get the layouts to control visibility correctly
+        securityAnswerLayout = findViewById(R.id.securityAnswerLayout);
+        newPasswordLayout = findViewById(R.id.newPasswordLayout);
+        confirmPasswordLayout = findViewById(R.id.confirmPasswordLayout);
+
+
         // Initially hide password reset fields
         securityQuestionText.setVisibility(View.GONE);
-        securityAnswerEditText.setVisibility(View.GONE);
-        newPasswordEditText.setVisibility(View.GONE);
-        confirmPasswordEditText.setVisibility(View.GONE);
+        securityAnswerLayout.setVisibility(View.GONE);
+        newPasswordLayout.setVisibility(View.GONE);
+        confirmPasswordLayout.setVisibility(View.GONE);
         resetPasswordButton.setVisibility(View.GONE);
 
         verifyButton.setOnClickListener(v -> {
@@ -69,8 +76,15 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             if (question != null && !question.isEmpty()) {
                 userEmail = email;
                 securityQuestionText.setText(question);
+
+                // Show all password recovery fields after verification
                 securityQuestionText.setVisibility(View.VISIBLE);
-                securityAnswerEditText.setVisibility(View.VISIBLE);
+                securityAnswerLayout.setVisibility(View.VISIBLE);
+                newPasswordLayout.setVisibility(View.VISIBLE);
+                confirmPasswordLayout.setVisibility(View.VISIBLE);
+                resetPasswordButton.setVisibility(View.VISIBLE);
+
+                // Disable email field and hide verify button
                 emailEditText.setEnabled(false);
                 verifyButton.setVisibility(View.GONE);
             } else {
@@ -108,7 +122,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
             // Verify answer and reset password
             boolean success = dbHelper.verifySecurityAnswerAndResetPassword(userEmail, answer, newPassword);
-            
+
             if (success) {
                 Toast.makeText(this, "Password reset successful. Please login", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, LoginActivity.class);
@@ -116,15 +130,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 finish();
             } else {
                 Toast.makeText(this, "Incorrect security answer. Please try again", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Show password fields when security answer is entered
-        securityAnswerEditText.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus && !securityAnswerEditText.getText().toString().trim().isEmpty()) {
-                newPasswordEditText.setVisibility(View.VISIBLE);
-                confirmPasswordEditText.setVisibility(View.VISIBLE);
-                resetPasswordButton.setVisibility(View.VISIBLE);
             }
         });
 
@@ -139,4 +144,3 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         }
     }
 }
-
