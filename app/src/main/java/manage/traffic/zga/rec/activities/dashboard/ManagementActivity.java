@@ -1,13 +1,13 @@
 package manage.traffic.zga.rec.activities.dashboard;
 
-import static android.app.ProgressDialog.show;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -153,11 +153,7 @@ public class ManagementActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_about) {
-            new AlertDialog.Builder(this)
-                    .setTitle("About")
-                    .setMessage("Traffic Accident Record App\nVersion 1.0\nDeveloped by: Group 4\n\nSubmitted To: Mr. Aschalew")
-                    .setPositiveButton("OK", null)
-                    .show();
+            showAboutDialog();
             return true;
 
         } else if (id == R.id.action_logout) {
@@ -176,6 +172,16 @@ public class ManagementActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showAboutDialog() {
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_about, null);
+
+        new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setPositiveButton("OK", null)
+                .show();
     }
 
     @Override
