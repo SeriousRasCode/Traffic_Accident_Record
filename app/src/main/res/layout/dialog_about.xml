@@ -39,9 +39,10 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:layout_marginBottom="16dp"
         android:gravity="center"
-        android:text="Abebe Bikila\nChala Challa\nKebede Feyisa\nYonas Girma"
+        android:text="Tedros Teshome\nBekam Berhanu\nEbasa Huluka\nElias Dugasa\nAbdi Dechasa\nFenet Abdo\nLiche Tsegaye"
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
     <TextView
