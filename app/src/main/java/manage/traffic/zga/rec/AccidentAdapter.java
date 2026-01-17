@@ -49,7 +49,7 @@ public class AccidentAdapter extends RecyclerView.Adapter<AccidentAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         HashMap<String, Object> item = list.get(position);
-        holder.idd.setText(String.valueOf(item.get(DBHelper.COLUMN_ID)));
+        holder.idd.setText(String.valueOf(position + 1));
         holder.dName.setText(String.valueOf(item.get(DBHelper.COLUMN_DRIVER)));
         holder.aType.setText(String.valueOf(item.get(DBHelper.COLUMN_TYPE)));
         holder.pNumber.setText(String.valueOf(item.get(DBHelper.COLUMN_PLATE)));

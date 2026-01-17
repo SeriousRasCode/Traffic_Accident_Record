@@ -1,5 +1,7 @@
 package manage.traffic.zga.rec.activities.dashboard;
 
+import static android.app.ProgressDialog.show;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -153,15 +155,23 @@ public class ManagementActivity extends AppCompatActivity {
         if (id == R.id.action_about) {
             new AlertDialog.Builder(this)
                     .setTitle("About")
-                    .setMessage("Traffic Accident Record App\nVersion 1.0\nDeveloped by: Group 4c\n\nSubmitted To: Mr. Aschalew")
+                    .setMessage("Traffic Accident Record App\nVersion 1.0\nDeveloped by: Group 4\n\nSubmitted To: Mr. Aschalew")
                     .setPositiveButton("OK", null)
                     .show();
             return true;
 
         } else if (id == R.id.action_logout) {
-            sharedPreferences.edit().clear().apply();
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
+            new AlertDialog.Builder(this)
+                    .setTitle("Logout")
+                    .setMessage("Are you sure you want to logout?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        sharedPreferences.edit().clear().apply();
+                        startActivity(new Intent(this, LoginActivity.class));
+                        finish();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+
             return true;
         }
 

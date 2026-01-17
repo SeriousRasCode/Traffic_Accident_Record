@@ -40,13 +40,13 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         verifyButton = findViewById(R.id.verifyButton);
         resetPasswordButton = findViewById(R.id.resetPasswordButton);
 
-        // Get the layouts to control visibility correctly
+        // our layouts to control visibility
         securityAnswerLayout = findViewById(R.id.securityAnswerLayout);
         newPasswordLayout = findViewById(R.id.newPasswordLayout);
         confirmPasswordLayout = findViewById(R.id.confirmPasswordLayout);
 
 
-        // Initially hide password reset fields
+        // Initially hidding password reset fields
         securityQuestionText.setVisibility(View.GONE);
         securityAnswerLayout.setVisibility(View.GONE);
         newPasswordLayout.setVisibility(View.GONE);
@@ -77,14 +77,14 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 userEmail = email;
                 securityQuestionText.setText(question);
 
-                // Show all password recovery fields after verification
+                // we Show all fields after verification
                 securityQuestionText.setVisibility(View.VISIBLE);
                 securityAnswerLayout.setVisibility(View.VISIBLE);
                 newPasswordLayout.setVisibility(View.VISIBLE);
                 confirmPasswordLayout.setVisibility(View.VISIBLE);
                 resetPasswordButton.setVisibility(View.VISIBLE);
 
-                // Disable email field and hide verify button
+                // we Disable email field and hide verify button
                 emailEditText.setEnabled(false);
                 verifyButton.setVisibility(View.GONE);
             } else {
@@ -124,16 +124,16 @@ public class ForgotPasswordActivity extends AppCompatActivity {
             boolean success = dbHelper.verifySecurityAnswerAndResetPassword(userEmail, answer, newPassword);
 
             if (success) {
-                Toast.makeText(this, "Password reset successful. Please login", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "reset successful. Please login", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
                 finish();
             } else {
-                Toast.makeText(this, "Incorrect security answer. Please try again", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Incorrect answer. Please try again", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // Login link
+
         TextView loginText = findViewById(R.id.loginText);
         if (loginText != null) {
             loginText.setOnClickListener(v -> {

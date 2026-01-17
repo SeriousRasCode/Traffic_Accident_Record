@@ -16,16 +16,18 @@ import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintDocumentInfo;
 import android.print.PrintManager;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.FileOutputStream;
@@ -41,13 +43,14 @@ import manage.traffic.zga.rec.activities.auth.LoginActivity;
 public class AdminDashboardActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private MaterialButton logoutButton;
     private FloatingActionButton printButton;
     private FloatingActionButton manageUsersButton;
     private SharedPreferences sharedPreferences;
     private MaterialToolbar toolbar;
     private ArrayList<HashMap<String, Object>> accidentList;
     private DBHelper dbHelper;
+    private AccidentAdapter adapter;
+    private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +58,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
         setContentView(R.layout.admin_dashboard);
 
         recyclerView = findViewById(R.id.recyclerView);
-        logoutButton = findViewById(R.id.logoutButton);
         printButton = findViewById(R.id.printButton);
         manageUsersButton = findViewById(R.id.manageUsersButton);
         toolbar = findViewById(R.id.toolbar);
@@ -66,39 +68,28 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
         loadAccidents();
 
-        logoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.clear();
-                editor.apply();
+        printButton.setOnClickListener(v -> printPDF());
 
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
-
-        printButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                printPDF();
-            }
-        });
-
-        manageUsersButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showManageUsersDialog();
-            }
-        });
+        manageUsersButton.setOnClickListener(v -> showManageUsersDialog());
     }
 
     private void loadAccidents() {
         accidentList = dbHelper.getAllAccidents();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        AccidentAdapter adapter = new AccidentAdapter(this, accidentList);
+        adapter = new AccidentAdapter(this, accidentList);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void filter(String text) {
+        ArrayList<HashMap<String, Object>> filteredList = new ArrayList<>();
+        for (HashMap<String, Object> item : accidentList) {
+            if (item.get(DBHelper.COLUMN_DRIVER).toString().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        if (adapter != null) {
+            adapter.filterList(filteredList);
+        }
     }
 
     private void showManageUsersDialog() {
@@ -126,20 +117,18 @@ public class AdminDashboardActivity extends AppCompatActivity {
         }
 
         builder.setMultiChoiceItems(userNames, checkedItems, (dialog, which, isChecked) -> {
-             int userId = ((Number) users.get(which).get(DBHelper.USER_COLUMN_ID)).intValue();
-             // Prevent removing admin rights from the "admin" user to avoid lockout
-             if (userNames[which].equals("admin") && !isChecked) {
-                 Toast.makeText(AdminDashboardActivity.this, "Cannot remove admin rights from superuser.", Toast.LENGTH_SHORT).show();
-                 ((AlertDialog) dialog).getListView().setItemChecked(which, true);
-                 return;
-             }
-             dbHelper.updateUserRole(userId, isChecked);
+            int userId = ((Number) users.get(which).get(DBHelper.USER_COLUMN_ID)).intValue();
+            if (userNames[which].equals("admin") && !isChecked) {
+                Toast.makeText(AdminDashboardActivity.this, "Cannot remove admin rights from superuser.", Toast.LENGTH_SHORT).show();
+                ((AlertDialog) dialog).getListView().setItemChecked(which, true);
+                return;
+            }
+            dbHelper.updateUserRole(userId, isChecked);
         });
 
         builder.setPositiveButton("Done", null);
         builder.show();
     }
-
 
     private void printPDF() {
         PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
@@ -149,6 +138,66 @@ public class AdminDashboardActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.admin_dashboard_menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchView = (SearchView) searchItem.getActionView();
+
+        if (searchView != null) {
+            searchView.setQueryHint("Search by driver name...");
+
+            EditText searchText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+            searchText.setTextColor(Color.WHITE);
+            searchText.setHintTextColor(Color.LTGRAY);
+
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    filter(newText);
+                    return true;
+                }
+            });
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_logout) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Confirm Logout")
+                    .setMessage("Are you sure you want to log out?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.clear();
+                        editor.apply();
+
+                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(intent);
+                        finish();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (searchView != null && !searchView.isIconified()) {
+            searchView.setIconified(true);
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -184,7 +233,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
             Canvas canvas = page.getCanvas();
             Paint paint = new Paint();
             paint.setColor(Color.BLACK);
-            paint.setTextSize(10); // Adjusted for more content
+            paint.setTextSize(10);
 
             int x = 10, y = 25;
 
@@ -196,7 +245,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
             paint.setFakeBoldText(false);
 
             for (HashMap<String, Object> map : list) {
-                if (y > 780) { // Check for page break before drawing record
+                if (y > 780) {
                     pdfDocument.finishPage(page);
                     pageInfo = new PdfDocument.PageInfo.Builder(595, 842, pdfDocument.getPages().size() + 1).create();
                     page = pdfDocument.startPage(pageInfo);
@@ -219,7 +268,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
                 canvas.drawText("Country: " + map.get(DBHelper.COLUMN_COUNTRY), x, y, paint);
                 y += 15;
                 canvas.drawText("Date: " + map.get(DBHelper.COLUMN_DATE), x, y, paint);
-                y += 25; // Extra space between records
+                y += 25;
             }
 
             pdfDocument.finishPage(page);
