@@ -11,6 +11,7 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:src="@drawable/splash"
+        android:padding="24dp"
         app:strokeColor="#008DCD"
         app:strokeWidth="1dp"
         app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircleImageView"
