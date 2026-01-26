@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.FileOutputStream;
@@ -65,11 +66,18 @@ public class AccidentAdapter extends RecyclerView.Adapter<AccidentAdapter.ViewHo
         });
 
         holder.delete.setOnClickListener(v -> {
-            DBHelper dbHelper = new DBHelper(context);
-            dbHelper.deleteAccident((Integer) item.get(DBHelper.COLUMN_ID));
-            list.remove(position);
-            notifyItemRemoved(position);
-            notifyItemRangeChanged(position, list.size());
+            new AlertDialog.Builder(context)
+                    .setTitle("Delete Record")
+                    .setMessage("Are you sure you want to delete this record?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        DBHelper dbHelper = new DBHelper(context);
+                        dbHelper.deleteAccident((Integer) item.get(DBHelper.COLUMN_ID));
+                        list.remove(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, list.size());
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
         });
 
         holder.print.setOnClickListener(v -> printCertificate(item));
